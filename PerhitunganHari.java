@@ -1,61 +1,39 @@
 package Tugas4;
-
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 public class PerhitunganHari extends javax.swing.JFrame {
 
-    /**
-     * Creates new form PerhitunganHari
-     */
     public PerhitunganHari() {
         initComponents();
-        setTitle("Aplikasi Perhitungan Hari dan Selisih Tanggal");
-        setLocationRelativeTo(null);
-        setResizable(false);
+          // Isi ComboBox bulan dengan nama-nama bulan
+    String[] namaBulan = {
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    };
 
-        // Isi ComboBox bulan
-        jComboBox1.removeAllItems();
-        String[] bulan = {"Januari", "Februari", "Maret", "April", "Mei", "Juni",
-                          "Juli", "Agustus", "September", "Oktober", "November", "Desember"};
-        for (String b : bulan) {
-            jComboBox1.addItem(b);
-        }
-
-        // Set default tahun ke tahun sekarang
-        int tahunSekarang = Calendar.getInstance().get(Calendar.YEAR);
-        jSpinner1.setValue(tahunSekarang);
-
-        // Tambahkan event untuk tombol
-        jButton1.addActionListener(e -> hitungJumlahHari());
-        jButton2.addActionListener(e -> hitungSelisihHari());
+    jComboBox1.removeAllItems(); // Kosongkan dulu isi bawaan "Item 1"
+    for (String bulan : namaBulan) {
+        jComboBox1.addItem(bulan);
+    }
     }
 
     private void hitungJumlahHari() {
         try {
-            int bulan = jComboBox1.getSelectedIndex(); // 0-11
+            int bulan = jComboBox1.getSelectedIndex();
             int tahun = (int) jSpinner1.getValue();
 
-            // Validasi tahun
             if (tahun <= 0) {
                 JOptionPane.showMessageDialog(this, "Tahun harus lebih dari 0", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Gunakan Calendar untuk hitung jumlah hari
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.YEAR, tahun);
-            cal.set(Calendar.MONTH, bulan);
-            int jumlahHari = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-
+            int jumlahHari = PerhitunganHariHelper.hitungJumlahHari(bulan, tahun);
             jLabel3.setText("Jumlah Hari : " + jumlahHari);
-            
-            // Info kabisat
-            boolean kabisat = (tahun % 4 == 0 && tahun % 100 != 0) || (tahun % 400 == 0);
-            String info = kabisat ? "Tahun " + tahun + " adalah tahun kabisat" : "Tahun " + tahun + " bukan tahun kabisat";
+
+            boolean kabisat = PerhitunganHariHelper.cekTahunKabisat(tahun);
+            String info = kabisat
+                ? "Tahun " + tahun + " adalah tahun kabisat"
+                : "Tahun " + tahun + " bukan tahun kabisat";
             jLabel4.setText("Info : " + info);
 
         } catch (Exception e) {
@@ -70,22 +48,14 @@ public class PerhitunganHari extends javax.swing.JFrame {
                 return;
             }
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String tgl1Str = sdf.format(jDateChooser1.getDate());
-            String tgl2Str = sdf.format(jDateChooser2.getDate());
-
-            LocalDate tgl1 = LocalDate.parse(tgl1Str);
-            LocalDate tgl2 = LocalDate.parse(tgl2Str);
-
-            long selisih = ChronoUnit.DAYS.between(tgl1, tgl2);
-            if (selisih < 0) selisih = -selisih;
-
+            long selisih = PerhitunganHariHelper.hitungSelisihHari(jDateChooser1.getDate(), jDateChooser2.getDate());
             jLabel7.setText("Selisih Hari : " + selisih + " hari");
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Terjadi kesalahan saat menghitung selisih: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
 
     /**
@@ -126,6 +96,11 @@ public class PerhitunganHari extends javax.swing.JFrame {
 
         jButton1.setBackground(new java.awt.Color(102, 255, 102));
         jButton1.setText("Hitung Hari");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
@@ -283,18 +258,18 @@ public class PerhitunganHari extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        hitungSelisihHari();
     }//GEN-LAST:event_jButton2ActionPerformed
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        hitungJumlahHari();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new PerhitunganHari().setVisible(true);
-            }
-        });
+     public static void main(String args[]) {
+        java.awt.EventQueue.invokeLater(() -> new PerhitunganHari().setVisible(true));
+    
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
